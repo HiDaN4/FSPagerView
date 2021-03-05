@@ -93,6 +93,9 @@ open class FSPagerView: UIView,UICollectionViewDataSource,UICollectionViewDelega
         }
     }
     
+    /// Set distance or item to use for calculating automatic slide offset
+    open var automaticSlidingBy: AutomaticSlideOffsetBy = .item
+    
     /// The time interval of automatic sliding. 0 means disabling automatic sliding. Default is 0.
     @IBInspectable
     open var automaticSlidingInterval: CGFloat = 0.0 {
@@ -625,6 +628,12 @@ extension FSPagerView {
         case horizontal
         /// The pager view scrolls content vertically
         case vertical
+    }
+    
+    /// Constants indicating the automatic slide content offset to use
+    public enum AutomaticSlideOffsetBy {
+        case distance(CGFloat)
+        case item
     }
     
     /// Requests that FSPagerView use the default value for a given distance.
