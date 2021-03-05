@@ -587,13 +587,38 @@ open class FSPagerView: UIView,UICollectionViewDataSource,UICollectionViewDelega
         guard let _ = self.superview, let _ = self.window, self.numberOfItems > 0, !self.isTracking else {
             return
         }
-        let contentOffset: CGPoint = {
-            let indexPath = self.centermostIndexPath
-            let section = self.numberOfSections > 1 ? (indexPath.section+(indexPath.item+1)/self.numberOfItems) : 0
-            let item = (indexPath.item+1) % self.numberOfItems
-            return self.collectionViewLayout.contentOffset(for: IndexPath(item: item, section: section))
-        }()
-        self.collectionView.setContentOffset(contentOffset, animated: true)
+        switch self.automaticSlidingBy {
+        case .item:
+            let contentOffset: CGPoint = {
+                let indexPath = self.centermostIndexPath
+                let section = self.numberOfSections > 1 ? (indexPath.section+(indexPath.item+1)/self.numberOfItems) : 0
+                let item = (indexPath.item+1) % self.numberOfItems
+                return self.collectionViewLayout.contentOffset(for: IndexPath(item: item, section: section))
+            }()
+            self.collectionView.setContentOffset(contentOffset, animated: true)
+            
+        case .distance(let value):
+            let contentOffset: CGPoint
+            switch scrollDirection {
+            case .horizontal:
+                contentOffset = {
+                    var offsetX = self.collectionView.contentOffset.x + value
+                    if offsetX > self.collectionView.contentSize.width {
+                        offsetX -= self.collectionView.contentSize.width
+                    }
+                    return CGPoint(x: offsetX, y: 0)
+                }()
+            case .vertical:
+                contentOffset = {
+                    var offsetY = self.collectionView.contentOffset.y + value
+                    if offsetY > self.collectionView.contentSize.height {
+                        offsetY -= self.collectionView.contentSize.height
+                    }
+                    return CGPoint(x: self.collectionView.contentOffset.x, y: offsetY)
+                }()
+            }
+            self.collectionView.setContentOffset(contentOffset, animated: true)
+        }
     }
     
     fileprivate func cancelTimer() {
